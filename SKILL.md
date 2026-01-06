@@ -1,23 +1,24 @@
-# MoonBit Refactoring Guide (AI-Oriented)
+---
+name: moonbit-refactoring
+description: Refactor MoonBit codebases by minimizing public APIs, modularizing packages, converting free functions to methods/chaining, using ArrayView/StringView pattern matching, adding Dafny-style loop specs, and improving tests/coverage without regressions. Use when asked to refactor or modernize MoonBit projects.
+---
 
-This guide captures refactoring patterns that make MoonBit code more modular,
-readable, and testable without regressions. It is general-purpose and intended
-for applying to any MoonBit codebase.
+# MoonBit Refactoring Skill
 
-## Goals
+## Intent
 - Preserve behavior and public contracts unless explicitly changed.
-- Expose the smallest public API surface required by callers.
+- Minimize the public API to what callers require.
 - Prefer declarative style and pattern matching over incidental mutation.
 - Use view types (ArrayView/StringView/BytesView) to avoid copies.
 - Add tests and docs alongside refactors.
 
-## Core Workflow
-1. Inventory public APIs and call sites (`moon doc`, `moon ide find-references`).
-2. Pick one refactor theme (API minimization, pattern matching, loop style).
-3. Apply the smallest safe change.
-4. Update docs/tests in the same patch.
-5. Run `moon check`, then `moon test`.
-6. Use coverage to target missing branches.
+## Workflow
+- Inventory public APIs and call sites (`moon doc`, `moon ide find-references`).
+- Pick one refactor theme (API minimization, pattern matching, loop style).
+- Apply the smallest safe change.
+- Update docs/tests in the same patch.
+- Run `moon check`, then `moon test`.
+- Use coverage to target missing branches.
 
 ## Minimize Public API and Modularize
 - Remove `pub` from helpers; keep only required exports.

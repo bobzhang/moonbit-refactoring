@@ -1,6 +1,6 @@
-# MoonBit Refactoring Guide
+# MoonBit Refactoring Skill
 
-This repo contains a general, AI-oriented refactoring guide for MoonBit
-codebases.
+This repo packages a general, AI-oriented refactoring guide for MoonBit
+codebases as a Codex skill.
 
-See `refactoring-skills.md` for the full guide.
+See `SKILL.md` for the canonical guide content.
