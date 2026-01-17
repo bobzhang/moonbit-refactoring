@@ -39,7 +39,7 @@ When spinning off package `A` into `A` and `B`:
 1. Create the new package and re-export temporarily:
    ```mbt
    // In package B
-   use @A { ... }  // re-export A's APIs
+   using @A { ... }  // re-export A's APIs
    ```
    Ensure `moon check` passes before proceeding.
 
@@ -60,26 +60,17 @@ When spinning off package `A` into `A` and `B`:
 
 ## Minimize Public API and Modularize
 - Remove `pub` from helpers; keep only required exports.
-- Use constructors like `Type::new` instead of public literal construction.
 - Move helpers into `internal/` packages to block external imports.
 - Split large files by feature; files do not define modules in MoonBit.
 
-Example:
-```mbt
-// Before: public construction everywhere
-pub struct Closure { ... }
+## Local refactoring
 
-// After: controlled construction
-pub struct Closure { ... }
-pub fn Closure::new(id : Int, params : Array[String]) -> Closure { { id, params } }
-```
-
-## Convert Free Functions to Methods + Chaining
+### Convert Free Functions to Methods + Chaining
 - Move behavior onto the owning type for discoverability.
 - Use `..` for fluent, mutating chains when it reads clearly.
 
 Example:
-```mbt
+```mbt nocheck
 // Before
 fn reader_next(r : Reader) -> Char? { ... }
 let ch = reader_next(r)
@@ -90,26 +81,26 @@ let ch = r.next()
 ```
 
 Example (chaining):
-```mbt
+```mbt nocheck
 buf..write_string("#\\")..write_char(ch)
 ```
 
-## Prefer Explicit Qualification
-- Use `@pkg.fn` instead of `use` when clarity matters.
+### Prefer Explicit Qualification
+- Use `@pkg.fn` instead of `using` when clarity matters.
 - Keep call sites explicit during wide refactors.
 
 Example:
-```mbt
+```mbt nocheck
 let n = @parser.parse_number(token)
 ```
 
-## Simplify Constructors When Type Is Known
+### Simplify Constructors When Type Is Known
 - Drop `TypePath::Constr` when the surrounding type is known.
 
 Example:
 ```mbt
-match tree {
-  Leaf(x) => x
+match tree { // the type of tree is known to be Tree
+  Leaf(x) => x // no need for Tree::Leaf
   Node(left~, x, right~) => left.sum() + x + right.sum()
 }
 ```
@@ -118,8 +109,7 @@ match tree {
 - Pattern match arrays directly; the compiler inserts ArrayView implicitly.
 - Use `..` in the middle to match prefix and suffix at once.
 - Pattern match strings directly; avoid converting to `Array[Char]`.
-- `String`/`StringView` indexing yields `UInt16` code units.
-- Use `for ch in s` for Unicode-aware iteration.
+- `String`/`StringView` indexing yields `UInt16` code units. Use `for ch in s` for Unicode-aware iteration.
 
 Examples:
 ```mbt
@@ -138,23 +128,21 @@ match s {
 }
 ```
 
-## Use Nested Patterns and `is`
-- Replace indexing with structural patterns.
-- Use nested patterns to encode invariants.
+### Use Nested Patterns and `is`
+
 - Use `is` patterns inside `if`/`guard` to keep branches concise.
 
 Example:
 ```mbt
 match token {
-  Some(Ident([.."@", ..rest])) => handle_at(rest)
+  Some(Ident([.."@", ..rest])) if rest.find("xx") is Some(x)  => handle_at(rest)
   Some(Ident(name)) => handle_ident(name)
   None => ()
 }
 ```
 
-## Prefer Range Loops for Simple Indexing
-- Use `for i in start..<end { ... }` for simple index loops.
-- Use `for i in start..=end { ... }` when the upper bound is inclusive.
+### Prefer Range Loops for Simple Indexing
+- Use `for i in start..<end { ... }`, `for i in start..<=end { ... }`, `for i in large>..small`, or `for i in large>=..small` for simple index loops.
 - Keep functional-state `for` loops for algorithms that update state.
 
 Example:
@@ -179,20 +167,20 @@ for i in 0..<len {
 Example:
 ```mbt
 for i = 0, acc = 0; i < xs.length(); {
-  // invariant : 0 <= i && i <= xs.length()
-  // invariant : acc == sum(xs[:i])
-  // decreases : xs.length() - i
   acc = acc + xs[i]
   i = i + 1
 } else { acc }
+where {
+  invariant: 0 <= i <= xs.length(),
+  reasoning: (
+    #| ... rigorous explanation ...
+    #| ...
+  )
+}
 ```
 
-Example (TODO):
-```mbt
-// TODO(invariant) : explain loop termination for this branch
-```
 
-## Tests and Docs
+### Tests and Docs
 - Prefer black-box tests in `*_test.mbt` or `*.mbt.md`.
 - Add docstring tests with `mbt check` for public APIs.
 
@@ -229,16 +217,4 @@ moon ide peek-def <symbol>
 moon check
 moon test
 moon info
-```
-
-## Learning Log Template
-Use one entry per refactor so the guide stays reusable.
-
-```
-## YYYY-MM-DD: Title
-- Problem: <what was unclear>
-- Change: <what was refactored>
-- Result: <impact on API/tests/coverage>
-- Example:
-<before/after or isolated snippet>
 ```
