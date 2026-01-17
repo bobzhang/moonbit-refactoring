@@ -1,6 +1,6 @@
 ---
 name: moonbit-refactoring
-description: Refactor MoonBit codebases by minimizing public APIs, modularizing packages, converting free functions to methods/chaining, using ArrayView/StringView pattern matching, adding Dafny-style loop specs, and improving tests/coverage without regressions. Use when asked to refactor or modernize MoonBit projects.
+description: Refactor MoonBit code to be idiomatic: shrink public APIs, convert functions to methods, use pattern matching with views, add loop invariants, and ensure test coverage without regressions.
 ---
 
 # MoonBit Refactoring Skill
