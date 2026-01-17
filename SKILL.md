@@ -13,12 +13,50 @@ description: Refactor MoonBit code to be idiomatic: shrink public APIs, convert 
 - Add tests and docs alongside refactors.
 
 ## Workflow
-- Inventory public APIs and call sites (`moon doc`, `moon ide find-references`).
-- Pick one refactor theme (API minimization, pattern matching, loop style).
-- Apply the smallest safe change.
-- Update docs/tests in the same patch.
-- Run `moon check`, then `moon test`.
-- Use coverage to target missing branches.
+**Start broad, then refine locally:**
+
+1. **Architecture first**: Review package structure, dependencies, and API boundaries.
+2. **Inventory** public APIs and call sites (`moon doc`, `moon ide find-references`).
+3. **Pick one refactor theme** (API minimization, package splits, pattern matching, loop style).
+4. **Apply the smallest safe change**.
+5. **Update docs/tests** in the same patch.
+6. **Run `moon check`, then `moon test`**.
+7. **Use coverage** to target missing branches.
+
+Avoid local cleanups (renaming, pattern matching) until the high-level structure is sound.
+
+## Improve Package Architecture
+- Keep packages focused: aim for <10k lines per package.
+- Keep files manageable: aim for <2k lines per file.
+- Keep functions focused: aim for <200 lines per function.
+
+### Splitting Files
+Files in MoonBit are just organizational—move code freely within a package as long as each file stays focused on one concept.
+
+### Splitting Packages
+When spinning off package `A` into `A` and `B`:
+
+1. Create the new package and re-export temporarily:
+   ```mbt
+   // In package B
+   use @A { ... }  // re-export A's APIs
+   ```
+   Ensure `moon check` passes before proceeding.
+
+2. Find and update all call sites:
+   ```bash
+   moon ide find-references <symbol>
+   ```
+   Replace bare `f` with `@B.f`.
+
+3. Remove the `use` statement once all call sites are updated.
+
+4. Audit and remove newly-unused `pub` APIs from both packages.
+
+### Guidelines
+- Prefer acyclic dependencies: lower-level packages should not import higher-level ones.
+- Only expose what downstream packages actually need.
+- Consider an `internal/` package for helpers that shouldn't leak.
 
 ## Minimize Public API and Modularize
 - Remove `pub` from helpers; keep only required exports.
