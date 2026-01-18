@@ -105,7 +105,7 @@ match tree { // the type of tree is known to be Tree
 }
 ```
 
-## Pattern Matching and Views
+### Pattern Matching and Views
 - Pattern match arrays directly; the compiler inserts ArrayView implicitly.
 - Use `..` in the middle to match prefix and suffix at once.
 - Pattern match strings directly; avoid converting to `Array[Char]`.
@@ -127,7 +127,7 @@ match s {
   _ => ()
 }
 ```
-### Char literal matching
+#### Char literal matching
 
 MoonBit allows char literal overloading for `Char`, `UInt16`, and `Int`, so the examples below work. This is handy when matching `String` indexing results (`UInt16`) against a char range.
 ```mbt
@@ -141,20 +141,20 @@ test {
 }
 ```
 
-### Use Nested Patterns and `is`
+#### Use Nested Patterns and `is`
 
 - Use `is` patterns inside `if`/`guard` to keep branches concise.
 
 Example:
 ```mbt
 match token {
-  Some(Ident([.."@", ..rest])) if rest.find("xx") is Some(x) => handle_at(rest)
+  Some(Ident([.."@", ..rest])) if process(rest) is Some(x) => handle_at(rest)
   Some(Ident(name)) => handle_ident(name)
   None => ()
 }
 ```
 
-### Prefer Range Loops for Simple Indexing
+#### Prefer Range Loops for Simple Indexing
 - Use `for i in start..<end { ... }`, `for i in start..<=end { ... }`, `for i in large>..small`, or `for i in large>=..small` for simple index loops.
 - Keep functional-state `for` loops for algorithms that update state.
 
