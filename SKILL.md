@@ -127,6 +127,19 @@ match s {
   _ => ()
 }
 ```
+### Char literal matching
+
+MoonBit allows char literal overloading for `Char`, `UInt16`, and `Int`, so the examples below work. This is handy when matching `String` indexing results (`UInt16`) against a char range.
+```mbt
+test {
+  let a_int : Int = 'b'
+  if (a_int is 'a'..<'z') { () } else { () }
+  let a_u16 : UInt16 = 'b'
+  if (a_u16 is 'a'..<'z') { () } else { () }
+  let a_char : Char = 'b'
+  if (a_char is 'a'..<'z') { () } else { () }
+}
+```
 
 ### Use Nested Patterns and `is`
 
@@ -135,7 +148,7 @@ match s {
 Example:
 ```mbt
 match token {
-  Some(Ident([.."@", ..rest])) if rest.find("xx") is Some(x)  => handle_at(rest)
+  Some(Ident([.."@", ..rest])) if rest.find("xx") is Some(x) => handle_at(rest)
   Some(Ident(name)) => handle_ident(name)
   None => ()
 }
@@ -209,6 +222,7 @@ moon coverage analyze -- -f caret -F path/to/file.mbt
 ```
 
 ## Moon IDE Commands
+
 ```bash
 moon doc "<query>"
 moon ide outline <dir|file>
@@ -218,3 +232,16 @@ moon check
 moon test
 moon info
 ```
+These commands are useful for reliable refactoring.
+
+Example: spinning off `package_b` from `package_a`.
+
+Temporary import in `package_b`:
+```mbt
+using @package_a { a, type B }
+```
+
+Steps:
+1. Use `moon ide find-references <symbol>` to find all call sites of `a` and `B`.
+2. Replace them with `@package_a.a` and `@package_a.B`.
+3. Remove the `using` statement and run `moon check`.
